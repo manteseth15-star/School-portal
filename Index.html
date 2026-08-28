@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nkrankrom M/A - Pro Management System</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1d4ed8;
+            --accent: #fcd116;
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --border: #cbd5e1;
+            --text: #334155;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); padding-bottom: 70px; }
+
+        /* Header */
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--accent); }
+        header h1 { margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; color: #fff;}
+        header p { margin: 5px 0 0 0; font-size: 12px; color: #94a3b8; }
+        .address { font-weight: bold; color: var(--accent); font-size: 13px; margin-top: 5px;}
+
+        /* Navigation Tabs */
+        .tab-bar { display: flex; background: white; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; }
+        .tab { flex: 1; padding: 12px 15px; text-align: center; font-size: 13px; font-weight: bold; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; min-width: 120px;}
+        .tab.active { color: var(--secondary); border-bottom: 3px solid var(--secondary); background: #eff6ff; }
+
+        /* Main Container */
+        .container { padding: 15px; max-width: 1000px; margin: 0 auto; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Cards & Forms */
+        .card { background: var(--surface); padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .card h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        
+        .flex-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;}
+        .flex-col { flex: 1; min-width: 120px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #475569; }
+        input, select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: var(--secondary); }
+        input[type="file"] { padding: 5px; font-size: 12px; background: #f8fafc;}
+
+        button { background: var(--secondary); color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        button.danger { background: #ef4444; }
+        button.success { background: #10b981; }
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 12px; }
+        th, td { border: 1px solid var(--border); padding: 6px; text-align: center; }
+        th { background: var(--primary); color: white; font-size: 11px; }
+        .input-cell { width: 45px; padding: 4px; text-align: center; border: 1px solid #94a3b8; border-radius: 3px; }
+        .calc-cell { font-weight: bold; background: #f8fafc; }
+        .name-col { text-align: left; min-width: 150px; font-weight: bold; }
+
+        /* Photo Thumbnail */
+        .thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+
+        /* Signatures Canvas */
+        .sig-canvas { border: 1px solid #94a3b8; background: #fff; border-radius: 4px; width: 100%; max-width: 250px; height: 80px; touch-action: none; cursor: crosshair; }
+        .sig-actions { display: flex; gap: 5px; max-width: 250px; margin-top: 5px; }
+
+        /* --- BULLETPROOF A4 FULL-PAGE PRINT SETUP --- */
+        #printArea { 
+            display: none; 
+            background: white; 
+            color: #000 !important; 
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 12mm 15mm;
+            box-sizing: border-box;
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .report-header-flex { display: flex; justify-content: flex-start; align-items: center; border-bottom: 4px double #000; padding-bottom: 12px; margin-bottom: 20px; }
+        .logo-box { width: 110px; height: 120px; border: 2px solid #000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: bold; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .school-info { text-align: center; flex: 1; padding-right: 110px; }
+        
+        .report-title { font-size: 22px; font-weight: 900; color: #000080 !important; margin: 0; }
+        .report-address { font-size: 14px; font-weight: bold; color: #000080 !important; margin: 4px 0; }
+        .report-subtitle { background: #000080 !important; color: white !important; display: inline-block; padding: 5px 20px; font-weight: bold; border-radius: 15px; margin-top: 6px; font-size: 13px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        
+        .student-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; font-size: 13px; font-weight: bold; margin-bottom: 20px; }
+        .info-row { border-bottom: 1px dotted #000; padding-bottom: 4px; }
+        
+        .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        .report-table th, .report-table td { border: 2px solid #000; padding: 8px 6px; text-align: center; color: #000 !important; }
+        .report-table th { background: #000080 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; padding: 10px 6px; }
+        .report-table .left-align { text-align: left; font-weight: bold; padding-left: 8px; }
+        
+        .remarks-section { font-size: 13px; font-weight: bold; line-height: 1.6; }
+        .flex-row-remark { display: flex; align-items: flex-end; margin-top: 14px; width: 100%; }
+        .flex-row-remark span:first-child { white-space: nowrap; margin-right: 10px; }
+        .remark-line { border-bottom: 1px solid #000; flex: 1; font-weight: normal; padding-left: 8px; min-height: 18px; }
+        
+        .signature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 40px; text-align: center; }
+        .sig-image-container { height: 45px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: -5px; }
+        .sig-line { border-bottom: 1px dotted #000; width: 100%; display: block; margin-bottom: 8px; min-height: 1px;}
+        
+        @media print {
+            html, body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+            header, .tab-bar, .container, .no-print, #printActions { display: none !important; }
+            #printArea { 
+                display: block !important; 
+                margin: 0 !important; 
+                width: 210mm !important;
+                height: 297mm !important; 
+                border: none !important;
+                outline: none !important;
+            }
+            .report-subtitle { background: #000080 !important; color: white !important; }
+            .report-title, .report-address { color: #000080 !important; }
+            th { background: #000080 !important; color: white !important; }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0mm; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>NKRANKROM M/A BASIC SCHOOL</h1>
+    <div class="address">POST OFFICE BOX SY 134, SUNYANI</div>
+    <p>Professional Learner Management System</p>
+</header>
+
+<div class="tab-bar">
+    <div class="tab active" onclick="switchTab('tab-students')">1. Roster & Photos</div>
+    <div class="tab" onclick="switchTab('tab-sba')">2. SBA Register</div>
+    <div class="tab" onclick="switchTab('tab-reports')">3. Terminal Reports</div>
+    <div class="tab" onclick="switchTab('tab-broadsheet')">4. Broadsheet</div>
+</div>
+
+<div class="container">
+    
+    <!-- Tab 1: Students -->
+    <div id="tab-students" class="section active">
+        <div class="card">
+            <h3 id="formTitle">Add Student to Roster</h3>
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Class</label>
+                    <select id="regClass"></select>
+                </div>
+                <div class="flex-col">
+                    <label>Roll Number</label>
+                    <select id="regRoll"></select>
+                </div>
+            </div>
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Student Full Name (Surname First)</label>
+                    <input type="text" id="regName" placeholder="e.g. ACQUAH FREDERICK">
+                </div>
+                <div class="flex-col">
+                    <label>Student Passport Picture</label>
+                    <input type="file" id="regPhoto" accept="image/*">
+                </div>
+            </div>
+            <button id="saveStudentBtn" onclick="saveStudent()">Add Student Securely</button>
+        </div>
+
+        <div class="card">
+            <h3>Current Roster</h3>
+            <select id="filterRoster" onchange="renderRoster()" style="margin-bottom: 10px;">
+                <option value="All">All Classes</option>
+            </select>
+            <div class="table-responsive">
+                <table id="rosterTable">
+                    <thead><tr><th>Photo</th><th>Roll</th><th>Name</th><th>Class</th><th>Action</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: SBA Register -->
+    <div id="tab-sba" class="section">
+        <div class="card">
+            <h3>SBA & Exam Mark Entry</h3>
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Select Class</label>
+                    <select id="sbaClass" onchange="loadSubjects(); loadSBATable();"></select>
+                </div>
+                <div class="flex-col">
+                    <label>Select Subject</label>
+                    <select id="sbaSubject" onchange="loadSBATable()"></select>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table id="sbaTable">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th class="name-col">NAME</th>
+                            <th>INDIV<br>TEST(15)</th>
+                            <th>GROUP<br>WORK(15)</th>
+                            <th>CLASS<br>TEST(15)</th>
+                            <th>PROJECT<br>(15)</th>
+                            <th>TOTAL<br>(60)</th>
+                            <th>SCALED<br>(50)</th>
+                            <th>EXAMS<br>(100)</th>
+                            <th>50%</th>
+                            <th>OVERALL<br>(100)</th>
+                            <th>POS</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div style="padding: 10px;">
+                <button class="success" onclick="saveSBASheet()">Save Subject Marks</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: Report Cards -->
+    <div id="tab-reports" class="section">
+        <div class="card">
+            <h3>Generate Student Report</h3>
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Class</label>
+                    <select id="repClass" onchange="loadReportStudents()"></select>
+                </div>
+                <div class="flex-col">
+                    <label>Select Student</label>
+                    <select id="repStudent" onchange="loadStudentDetails()"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="reportDetailsForm" style="display: none;">
+            <h3>End of Term Details</h3>
+            
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Academic Year</label>
+                    <select id="rYear"></select>
+                </div>
+                <div class="flex-col">
+                    <label>Term</label>
+                    <select id="rTerm">
+                        <option value="ONE">ONE</option>
+                        <option value="TWO">TWO</option>
+                        <option value="THREE" selected>THREE</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Next Term Begins</label>
+                    <input type="date" id="rNext">
+                </div>
+                <div class="flex-col">
+                    <label>Vacation Date</label>
+                    <input type="date" id="rVac">
+                </div>
+            </div>
+            
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Attendance</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="number" id="rAttPresent" placeholder="Present" style="width: 80px;">
+                        <span style="font-size: 11px; font-weight: bold; white-space: nowrap;">OUT OF</span>
+                        <input type="number" id="rAttTotal" placeholder="Total" style="width: 80px;">
+                    </div>
+                </div>
+                <div class="flex-col">
+                    <label>Promoted To</label>
+                    <select id="rProm"></select>
+                </div>
+            </div>
+            
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Attitude</label>
+                    <select id="rAttitude" onchange="handleCustomInput('rAttitude', 'rAttitudeCustomBox')">
+                        <option value="">-- Select Attitude --</option>
+                        <optgroup label="Highly Diligent & Active">
+                            <option value="Very hardworking and pays attention during lessons">Very hardworking and pays attention during lessons</option>
+                            <option value="Always punctual and regular to school">Always punctual and regular to school</option>
+                            <option value="Participates actively in morning assembly and hymns">Participates actively in morning assembly and hymns</option>
+                            <option value="Very enthusiastic during compound sweeping and weeding">Very enthusiastic during compound sweeping and weeding</option>
+                            <option value="Quick to finish class exercises and assignments">Quick to finish class exercises and assignments</option>
+                            <option value="Very neat, tidy, and takes care of books">Very neat, tidy, and takes care of books</option>
+                            <option value="Eager to answer questions during mental drills">Eager to answer questions during mental drills</option>
+                            <option value="Always ready to run errands for teachers respectfully">Always ready to run errands for teachers respectfully</option>
+                            <option value="Takes group SBA tasks and practicals very seriously">Takes group SBA tasks and practicals very seriously</option>
+                            <option value="Helps clean the chalkboard and arrange classroom desks">Helps clean the chalkboard and arrange classroom desks</option>
+                            <option value="Shows exceptional curiosity during science and discovery sessions">Shows exceptional curiosity during science and discovery sessions</option>
+                            <option value="Volunteers willingly to distribute teaching and learning materials">Volunteers willingly to distribute teaching and learning materials</option>
+                            <option value="Demonstrates high integrity by completing tasks independently">Demonstrates high integrity by completing tasks independently</option>
+                            <option value="Keeps learning station tidy and well-organized at all times">Keeps learning station tidy and well-organized at all times</option>
+                            <option value="Exhibits wonderful patience when helping struggling peers">Exhibits wonderful patience when helping struggling peers</option>
+                        </optgroup>
+                        <optgroup label="Playful & Authentic Ghanaian School Behaviours">
+                            <option value="Often comes late due to early morning house chores or long-distance trekking to school">Often comes late due to early morning house chores or long-distance trekking to school</option>
+                            <option value="Prone to heavy dozing off and yawning during hot afternoon instructional hours">Prone to heavy dozing off and yawning during hot afternoon instructional hours</option>
+                            <option value="Fond of playing 'ampe', rubber-band skipping, or seed games during break time">Fond of playing 'ampe', rubber-band skipping, or seed games during break time</option>
+                            <option value="Easily distracted by street hawkers selling ice cream, 'sobolo', or plantain chips passing windows">Easily distracted by street hawkers selling ice cream, 'sobolo', or plantain chips passing windows</option>
+                            <option value="Frequently leaves homework books behind or wraps exercise books in old newspaper">Frequently leaves homework books behind or wraps exercise books in old newspaper</option>
+                            <option value="Quick to slip into local dialect (Twi/Ga/Ewe) when strict English-only rule is set">Quick to slip into local dialect (Twi/Ga/Ewe) when strict English-only rule is set</option>
+                            <option value="Eager to pack school bag and dash outside immediately the closing bell sounds">Eager to pack school bag and dash outside immediately the closing bell sounds</option>
+                            <option value="Brings bottled drinking water to class and gets distracted sharing sips with seatmates">Brings bottled drinking water to class and gets distracted sharing sips with seatmates</option>
+                            <option value="Reluctant or slow when carrying communal labor tools like heavy cutlasses and hoes">Reluctant or slow when carrying communal labor tools like heavy cutlasses and hoes</option>
+                            <option value="Fond of chewing pencil tips or making paper pellet shooters during lessons">Fond of chewing pencil tips or making paper pellet shooters during lessons</option>
+                            <option value="Needs constant supervision to sweep assigned classroom corners properly">Needs constant supervision to sweep assigned classroom corners properly</option>
+                            <option value="Dances or beats rhythmic tunes on school desk whenever street brass band or drumming passes">Dances or beats rhythmic tunes on school desk whenever street brass band or drumming passes</option>
+                            <option value="Rushes through class tasks hurriedly just to go outside and join peers on the compound">Rushes through class tasks hurriedly just to go outside and join peers on the compound</option>
+                            <option value="Frequently asks permission to go out to drink water or visit the washroom">Frequently asks permission to go out to drink water or visit the washroom</option>
+                            <option value="Exhibits extreme excitement when Friday afternoon approaches or when sports periods are announced">Exhibits extreme excitement when Friday afternoon approaches or when sports periods are announced</option>
+                            <option value="Frequently brings roasted groundnuts or 'kuli-kuli' to class to snack on stealthily during lectures">Frequently brings roasted groundnuts or 'kuli-kuli' to class to snack on stealthily during lectures</option>
+                            <option value="Prone to group singing or humming local gospel tunes when the teacher steps out briefly">Prone to group singing or humming local gospel tunes when the teacher steps out briefly</option>
+                            <option value="Enthusiastic about trading colorful plastic rubber bands and collecting pencil eraser stamps">Enthusiastic about trading colorful plastic rubber bands and collecting pencil eraser stamps</option>
+                            <option value="Fond of using wet chalk or eraser dust playfully to draw patterns on desks">Fond of using wet chalk or eraser dust playfully to draw patterns on desks</option>
+                            <option value="Quick to volunteer to clean the chalkboard just to walk around the classroom">Quick to volunteer to clean the chalkboard just to walk around the classroom</option>
+                            <option value="Excitedly points out passing lizards, butterflies, or rain clouds through open classroom windows">Excitedly points out passing lizards, butterflies, or rain clouds through open classroom windows</option>
+                            <option value="Frequently asks to borrow pens, rulers, or erasers from seatmates mid-lesson">Frequently asks to borrow pens, rulers, or erasers from seatmates mid-lesson</option>
+                            <option value="Very quick to adapt and dance to classroom drumming or clapping rhythms during cultural practice">Very quick to adapt and dance to classroom drumming or clapping rhythms during cultural practice</option>
+                            <option value="Often brings local polythene bags filled with fried yam or 'boflot' to share with friends during break time">Often brings local polythene bags filled with fried yam or 'boflot' to share with friends during break time</option>
+                            <option value="Prone to shouting 'Hooray!' excitedly whenever the heavy afternoon rain begins to fall on the aluminum roof">Prone to shouting 'Hooray!' excitedly whenever the heavy afternoon rain begins to fall on the aluminum roof</option>
+                            <option value="Fond of collecting discarded sweet wrappers and bottle caps to create colorful play mats">Fond of collecting discarded sweet wrappers and bottle caps to create colorful play mats</option>
+                            <option value="Quick to help push the teacher's motorcycle or car when it fails to start after closing hours">Quick to help push the teacher's motorcycle or car when it fails to start after closing hours</option>
+                            <option value="Enthusiastically joins in chanting multiplication tables or spelling drills in a loud chorus with peers">Enthusiastically joins in chanting multiplication tables or spelling drills in a loud chorus with peers</option>
+                        </optgroup>
+                        <optgroup label="Custom Options">
+                            <option value="CUSTOM_WRITE">✏️ Write Custom Attitude...</option>
+                        </optgroup>
+                    </select>
+                    <div id="rAttitudeCustomBox" style="display:none; margin-top:6px;">
+                        <input type="text" id="rAttitudeCustomInput" placeholder="Type your own attitude here..." oninput="syncCustomInput('rAttitudeCustomInput', 'rAttitude')">
+                    </div>
+                </div>
+                <div class="flex-col">
+                    <label>Conduct</label>
+                    <select id="rConduct" onchange="handleCustomInput('rConduct', 'rConductCustomBox')">
+                        <option value="">-- Select Conduct --</option>
+                        <optgroup label="Exemplary & Disciplined">
+                            <option value="Very respectful, polite, and greets elders with a slight bow">Very respectful, polite, and greets elders with a slight bow</option>
+                            <option value="Neatly dressed with clean ironed uniform, white socks, and polished black shoes">Neatly dressed with clean ironed uniform, white socks, and polished black shoes</option>
+                            <option value="Honest, trustworthy, and promptly returns found items to teachers">Honest, trustworthy, and promptly returns found items to teachers</option>
+                            <option value="Well-behaved, quiet, and attentive during morning devotion and assembly">Well-behaved, quiet, and attentive during morning devotion and assembly</option>
+                            <option value="Keeps school property safe, avoids carving desks or defacing walls">Keeps school property safe, avoids carving desks or defacing walls</option>
+                            <option value="Relates peacefully with schoolmates without engaging in fistfights">Relates peacefully with schoolmates without engaging in fistfights</option>
+                            <option value="Shows great leadership qualities and enforces order as a class prefect">Shows great leadership qualities and enforces order as a class prefect</option>
+                            <option value="Gentle, orderly, and strictly obeys all school rules and regulations">Gentle, orderly, and strictly obeys all school rules and regulations</option>
+                            <option value="Always stands up politely to welcome visiting teachers and inspectors">Always stands up politely to welcome visiting teachers and inspectors</option>
+                            <option value="Exemplifies outstanding peer mentorship and positive moral influence">Exemplifies outstanding peer mentorship and positive moral influence</option>
+                            <option value="Maintains immaculate standards of personal hygiene, clean hair, and trimmed nails">Maintains immaculate standards of personal hygiene, clean hair, and trimmed nails</option>
+                            <option value="Resolves minor peer disagreements amicably without shouting">Resolves minor peer disagreements amicably without shouting</option>
+                            <option value="Shows deep reverence for national symbols, the flag, and anthem protocols">Shows deep reverence for national symbols, the flag, and anthem protocols</option>
+                            <option value="Highly dependable and executes assigned monitor duties responsibly">Highly dependable and executes assigned monitor duties responsibly</option>
+                            <option value="Consistently upholds core Ghanaian cultural values of respect and communal care">Consistently upholds core Ghanaian cultural values of respect and communal care</option>
+                        </optgroup>
+                        <optgroup label="Typical Ghanaian School Disciplinary Realities">
+                            <option value="Tends to make buzzing noise with classmates immediately the teacher steps out">Tends to make buzzing noise with classmates immediately the teacher steps out</option>
+                            <option value="Prone to petty reporting ('He has beaten me', 'She took my pencil') to the teacher">Prone to petty reporting ('He has beaten me', 'She took my pencil') to the teacher</option>
+                            <option value="Sometimes forgets to trim fingernails, clean footwear, or tuck in shirt properly">Sometimes forgets to trim fingernails, clean footwear, or tuck in shirt properly</option>
+                            <option value="Likes wandering around classroom blocks and chatting during prep hours">Likes wandering around classroom blocks and chatting during prep hours</option>
+                            <option value="Uses playful colloquial slangs and teasing jokes with desk-mates">Uses playful colloquial slangs and teasing jokes with desk-mates</option>
+                            <option value="Hesitant to obey instructions given by school prefects or senior students">Hesitant to obey instructions given by school prefects or senior students</option>
+                            <option value="Careless with textbook covers, often tearing pages or leaving books unbacked">Careless with textbook covers, often tearing pages or leaving books unbacked</option>
+                            <option value="Prone to keeping snacks, plantain chips, or roasted corn hidden inside desk compartments">Prone to keeping snacks, plantain chips, or roasted corn hidden inside desk compartments</option>
+                            <option value="Sometimes ducks behind tall classmates when the teacher looks around for answers">Sometimes ducks behind tall classmates when the teacher looks around for answers</option>
+                            <option value="Easily carried away by classroom jokes, giggling long after others have settled">Easily carried away by classroom jokes, giggling long after others have settled</option>
+                            <option value="Needs supervision to pack books neatly into school bags before departure">Needs supervision to pack books neatly into school bags before departure</option>
+                            <option value="Occasionally swaps seating arrangements without permission when teacher writes on board">Occasionally swaps seating arrangements without permission when teacher writes on board</option>
+                            <option value="Tends to drag feet or move sluggishly when sent on urgent staffroom errands">Tends to drag feet or move sluggishly when sent on urgent staffroom errands</option>
+                            <option value="Slow to fall in line orderly when the bell rings for break or assembly">Slow to fall in line orderly when the bell rings for break or assembly</option>
+                            <option value="Occasionally slips past the school gate or fence wall briefly without proper exit clearance">Occasionally slips past the school gate or fence wall briefly without proper exit clearance</option>
+                            <option value="Prone to tapping desk-mates on the shoulder playfully during quiet study time">Prone to tapping desk-mates on the shoulder playfully during quiet study time</option>
+                            <option value="Tends to hide behind opened textbooks when called upon to answer unexpected questions">Tends to hide behind opened textbooks when called upon to answer unexpected questions</option>
+                            <option value="Frequently caught whispering folktales or neighborhood gist during morning devotions">Frequently caught whispering folktales or neighborhood gist during morning devotions</option>
+                            <option value="Reluctant to return borrowed pens or erasers immediately after use">Reluctant to return borrowed pens or erasers immediately after use</option>
+                            <option value="Occasionally tries to smuggle personal toys or rubber footballs into the classroom">Occasionally tries to smuggle personal toys or rubber footballs into the classroom</option>
+                            <option value="Prone to making paper fans to cool off during hot and humid afternoon periods">Prone to making paper fans to cool off during hot and humid afternoon periods</option>
+                            <option value="Sometimes stretches or yawns audibly when finding lengthy chalkboard notes tedious">Sometimes stretches or yawns audibly when finding lengthy chalkboard notes tedious</option>
+                            <option value="Careless with school sandals, often leaving them scattered outside the classroom doorway">Careless with school sandals, often leaving them scattered outside the classroom doorway</option>
+                            <option value="Prone to wearing colorful non-prescribed wristbands or rubber bracelets hidden under shirt sleeves">Prone to wearing colorful non-prescribed wristbands or rubber bracelets hidden under shirt sleeves</option>
+                            <option value="Tends to argue excitedly over football match results during class break intervals">Tends to argue excitedly over football match results during class break intervals</option>
+                            <option value="Occasionally forgets to wear the official school belt, requiring constant gentle reminders">Occasionally forgets to wear the official school belt, requiring constant gentle reminders</option>
+                            <option value="Fond of keeping extra pocket money hidden inside socks or stitched uniform pockets">Fond of keeping extra pocket money hidden inside socks or stitched uniform pockets</option>
+                            <option value="Quick to form a protective defense ring around classmates during minor playground disputes">Quick to form a protective defense ring around classmates during minor playground disputes</option>
+                        </optgroup>
+                        <optgroup label="Custom Options">
+                            <option value="CUSTOM_WRITE">✏️ Write Custom Conduct...</option>
+                        </optgroup>
+                    </select>
+                    <div id="rConductCustomBox" style="display:none; margin-top:6px;">
+                        <input type="text" id="rConductCustomInput" placeholder="Type your own conduct here..." oninput="syncCustomInput('rConductCustomInput', 'rConduct')">
+                    </div>
+                </div>
+            </div>
+            
+            <label>Interest</label>
+            <select id="rInterest" style="margin-bottom: 10px;" onchange="handleCustomInput('rInterest', 'rInterestCustomBox')">
+                <option value="">-- Select Interest --</option>
+                <optgroup label="Sports & Games">
+                    <option value="Passionate about playing football for the school team and community matches">Passionate about playing football for the school team and community matches</option>
+                    <option value="Excels in athletics, inter-schools track running, and relay events">Excels in athletics, inter-schools track running, and relay events</option>
+                    <option value="Enjoys playing traditional Ghanaian games like Ampe, Oware, and Ludo">Enjoys playing traditional Ghanaian games like Ampe, Oware, and Ludo</option>
+                    <option value="Active participant and star player in inter-house sports competitions">Active participant and star player in inter-house sports competitions</option>
+                    <option value="Shows great agility, speed, and teamwork in school ball games">Shows great agility, speed, and teamwork in school ball games</option>
+                    <option value="Loves table tennis, skipping rope, and competitive playground board games">Loves table tennis, skipping rope, and competitive playground board games</option>
+                </optgroup>
+                <optgroup label="Academics & Clubs">
+                    <option value="Enthusiastic about reading storybooks, local folktales, and library novels">Enthusiastic about reading storybooks, local folktales, and library novels</option>
+                    <option value="Active and sharp member of Science, Mathematics, and Culture quiz club">Active and sharp member of Science, Mathematics, and Culture quiz club</option>
+                    <option value="Loves computing, keyboard practice, and ICT laboratory sessions">Loves computing, keyboard practice, and ICT laboratory sessions</option>
+                    <option value="Good at debating current affairs, spelling bees, and public speaking">Good at debating current affairs, spelling bees, and public speaking</option>
+                    <option value="Keen interest in geography map-work, local history, and social studies">Keen interest in geography map-work, local history, and social studies</option>
+                    <option value="Passionate about solving complex arithmetic word problems and mental math">Passionate about solving complex arithmetic word problems and mental math</option>
+                </optgroup>
+                <optgroup label="Culture & Vocational">
+                    <option value="Active member of cultural drumming, dancing, and traditional singing troupe">Active member of cultural drumming, dancing, and traditional singing troupe</option>
+                    <option value="Enjoys singing hymns and anthems in the school choir or singing band">Enjoys singing hymns and anthems in the school choir or singing band</option>
+                    <option value="Creative in making local craftwork, bead-making, and visual arts">Creative in making local craftwork, bead-making, and visual arts</option>
+                    <option value="Deeply interested in agricultural science, nursery bed preparation, and school gardening">Deeply interested in agricultural science, nursery bed preparation, and school gardening</option>
+                    <option value="Talented in sewing, cloth stitching, embroidery, and basic home economics">Talented in sewing, cloth stitching, embroidery, and basic home economics</option>
+                    <option value="Passionate about dramatic poetry recitals, cultural sketches, and storytelling">Passionate about dramatic poetry recitals, cultural sketches, and storytelling</option>
+                    <option value="Passionate about building improvised wire cars, toy trucks, and plastic bottle helicopters">Passionate about building improvised wire cars, toy trucks, and plastic bottle helicopters</option>
+                    <option value="Enthusiastic about participating in inter-schools Bible recitation and scripture union sessions">Enthusiastic about participating in inter-schools Bible recitation and scripture union sessions</option>
+                    <option value="Loves sketching cartoon characters and local movie heroes in exercise book margins">Loves sketching cartoon characters and local movie heroes in exercise book margins</option>
+                    <option value="Deeply interested in collecting local medicinal leaves and plant specimens for nature study">Deeply interested in collecting local medicinal leaves and plant specimens for nature study</option>
+                    <option value="Enjoys organizing friends to rehearse popular local gospel choreography and dance routines">Enjoys organizing friends to rehearse popular local gospel choreography and dance routines</option>
+                </optgroup>
+                <optgroup label="Custom Options">
+                    <option value="CUSTOM_WRITE">✏️ Write Custom Interest...</option>
+                </optgroup>
+            </select>
+            <div id="rInterestCustomBox" style="display:none; margin-bottom: 10px;">
+                <input type="text" id="rInterestCustomInput" placeholder="Type your own interest here..." oninput="syncCustomInput('rInterestCustomInput', 'rInterest')">
+            </div>
+            
+            <div class="flex-row">
+                <div class="flex-col">
+                    <label>Class Teacher's Remarks</label>
+                    <select id="rTRemarks" onchange="handleCustomInput('rTRemarks', 'rTRemarksCustomBox')">
+                        <option value="">-- Select Teacher's Remark --</option>
+                        <option value="An exceptional performance this term. Keep it up!">An exceptional performance this term. Keep it up!</option>
+                        <option value="A very brilliant and hardworking pupil. Proud of you!">A very brilliant and hardworking pupil. Proud of you!</option>
+                        <option value="Good results achieved through steady focus and hard work.">Good results achieved through steady focus and hard work.</option>
+                        <option value="A satisfactory performance. Put in more effort next term.">A satisfactory performance. Put in more effort next term.</option>
+                        <option value="Possesses high potential but needs to stop playing around.">Possesses high potential but needs to stop playing around.</option>
+                        <option value="Needs to practice reading and spelling more during holidays.">Needs to practice reading and spelling more during holidays.</option>
+                        <option value="Must pull up socks in Mathematics and Science calculations.">Must pull up socks in Mathematics and Science calculations.</option>
+                        <option value="A below-average performance. Parents must supervise home studies.">A below-average performance. Parents must supervise home studies.</option>
+                        <option value="Regular school attendance has yielded these fine results.">Regular school attendance has yielded these fine results.</option>
+                        <option value="Shows poor attitude to homework; teacher and parent must monitor.">Shows poor attitude to homework; teacher and parent must monitor.</option>
+                        <option value="You can do much better than this with serious attention.">You can do much better than this with serious attention.</option>
+                        <option value="A dedicated learner who never misses assignments.">A dedicated learner who never misses assignments.</option>
+                        <option value="Showing steady academic growth across all core subjects.">Showing steady academic growth across all core subjects.</option>
+                        <option value="Brilliant class participation; maintain this wonderful momentum.">Brilliant class participation; maintain this wonderful momentum.</option>
+                        <option value="Needs consistent practice in dictation and vocabulary building.">Needs consistent practice in dictation and vocabulary building.</option>
+                        <option value="Exceptional dedication to project work and group assignments.">Exceptional dedication to project work and group assignments.</option>
+                        <option value="Easily distracted; parental guidance at home will work wonders.">Easily distracted; parental guidance at home will work wonders.</option>
+                        <option value="A very polite child who shows great promise for next term.">A very polite child who shows great promise for next term.</option>
+                        <option value="Must take terminal examinations more seriously moving forward.">Must take terminal examinations more seriously moving forward.</option>
+                        <option value="Commendable improvement compared to previous term's record.">Commendable improvement compared to previous term's record.</option>
+                        <option value="Has great hidden capability; needs extra holiday classes to unlock full potential.">Has great hidden capability; needs extra holiday classes to unlock full potential.</option>
+                        <option value="Shows remarkable handwriting neatness; keep up this aesthetic standard.">Shows remarkable handwriting neatness; keep up this aesthetic standard.</option>
+                        <option value="A polite pupil whose punctuality needs improvement during the rainy season.">A polite pupil whose punctuality needs improvement during the rainy season.</option>
+                        <option value="Must invest more time in reading local storybooks instead of playing street games.">Must invest more time in reading local storybooks instead of playing street games.</option>
+                        <option value="An inspiring transformation in academics this term. Congratulations!">An inspiring transformation in academics this term. Congratulations!</option>
+                        <optgroup label="Custom Options">
+                            <option value="CUSTOM_WRITE">✏️ Write Custom Teacher's Remark...</option>
+                        </optgroup>
+                    </select>
+                    <div id="rTRemarksCustomBox" style="display:none; margin-top:6px;">
+                        <input type="text" id="rTRemarksCustomInput" placeholder="Type your own teacher's remark here..." oninput="syncCustomInput('rTRemarksCustomInput', 'rTRemarks')">
+                    </div>
+                </div>
+                <div class="flex-col">
+                    <label>Headteacher's Remarks</label>
+                    <select id="rHRemarks" onchange="handleCustomInput('rHRemarks', 'rHRemarksCustomBox')">
+                        <option value="">-- Select Headteacher's Remark --</option>
+                        <option value="An outstanding result! Highly commended.">An outstanding result! Highly commended.</option>
+                        <option value="Very good performance. Keep flying the school flag high!">Very good performance. Keep flying the school flag high!</option>
+                        <option value="A disciplined and studious pupil. Make us prouder next term.">A disciplined and studious pupil. Make us prouder next term.</option>
+                        <option value="Satisfactory progress made. Study harder for better grades.">Satisfactory progress made. Study harder for better grades.</option>
+                        <option value="Promoted, but must fix previous weaknesses immediately.">Promoted, but must fix previous weaknesses immediately.</option>
+                        <option value="Fair result, but you are capable of achieving higher.">Fair result, but you are capable of achieving higher.</option>
+                        <option value="Parents are strongly urged to monitor home assignments.">Parents are strongly urged to monitor home assignments.</option>
+                        <option value="Promoted strictly on trial. Core subjects need serious attention.">Promoted strictly on trial. Core subjects need serious attention.</option>
+                        <option value="Lateness and truancy must stop immediately or face sanctions.">Lateness and truancy must stop immediately or face sanctions.</option>
+                        <option value="A disappointing result. Total dedication is required next term.">A disappointing result. Total dedication is required next term.</option>
+                        <option value="Keep up the good behavior and excellent academic spirit.">Keep up the good behavior and excellent academic spirit.</option>
+                        <option value="An inspiring performance that deserves high praise.">An inspiring performance that deserves high praise.</option>
+                        <option value="Good terminal standing. Keep up the excellent work ethic.">Good terminal standing. Keep up the excellent work ethic.</option>
+                        <option value="Needs sharper focus on academic goals during vacation time.">Needs sharper focus on academic goals during vacation time.</option>
+                        <option value="A commendable display of character and academic diligence.">A commendable display of character and academic diligence.</option>
+                        <option value="Parents and teachers must partner closely to boost performance.">Parents and teachers must partner closely to boost performance.</option>
+                        <option value="Great effort shown; build further upon these solid foundations.">Great effort shown; build further upon these solid foundations.</option>
+                        <option value="A reliable student with excellent potential for excellence.">A reliable student with excellent potential for excellence.</option>
+                        <option value="Strict adherence to school rules will yield even better outcomes.">Strict adherence to school rules will yield even better outcomes.</option>
+                        <option value="Proud of your steady progress this term. Well done!">Proud of your steady progress this term. Well done!</option>
+                        <option value="A promising profile of discipline; parents should continue supporting this academic journey.">A promising profile of discipline; parents should continue supporting this academic journey.</option>
+                        <option value="Stellar terminal results! The school management is proud of your achievements.">Stellar terminal results! The school management is proud of your achievements.</option>
+                        <option value="Needs stronger parental supervision regarding punctuality and attendance next term.">Needs stronger parental supervision regarding punctuality and attendance next term.</option>
+                        <option value="Good progress overall, but continuous practice during holidays is mandatory.">Good progress overall, but continuous practice during holidays is mandatory.</option>
+                        <option value="An exemplary school ambassador. Maintain this high moral and academic standard.">An exemplary school ambassador. Maintain this high moral and academic standard.</option>
+                        <optgroup label="Custom Options">
+                            <option value="CUSTOM_WRITE">✏️ Write Custom Headteacher's Remark...</option>
+                        </optgroup>
+                    </select>
+                    <div id="rHRemarksCustomBox" style="display:none; margin-top:6px;">
+                        <input type="text" id="rHRemarksCustomInput" placeholder="Type your own headteacher's remark here..." oninput="syncCustomInput('rHRemarksCustomInput', 'rHRemarks')">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Digital Signatures Capture Section -->
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #334155;">Digital Signatures (Draw Once & Save)</h4>
+                <div class="flex-row">
+                    <div class="flex-col">
+                        <label>Class Teacher's Signature</label>
+                        <canvas id="tSigCanvas" class="sig-canvas" width="250" height="80"></canvas>
+                        <div class="sig-actions">
+                            <button class="danger" style="margin:0; padding:6px; font-size:11px;" onclick="clearCanvas('tSigCanvas')">Clear</button>
+                            <button class="success" style="margin:0; padding:6px; font-size:11px;" onclick="saveSignatures()">Save Signatures</button>
+                        </div>
+                    </div>
+                    <div class="flex-col">
+                        <label>Headteacher's Signature</label>
+                        <canvas id="hSigCanvas" class="sig-canvas" width="250" height="80"></canvas>
+                        <div class="sig-actions">
+                            <button class="danger" style="margin:0; padding:6px; font-size:11px;" onclick="clearCanvas('hSigCanvas')">Clear</button>
+                            <button class="success" style="margin:0; padding:6px; font-size:11px;" onclick="saveSignatures()">Save Signatures</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="success" onclick="generateReport()" style="margin-top: 15px; font-size: 16px;">Generate & View Report Card</button>
+        </div>
+    </div>
+
+    <!-- Tab 4: Broadsheet -->
+    <div id="tab-broadsheet" class="section">
+        <div class="card">
+            <h3>Class Broadsheet</h3>
+            <p>View overall totals and positions for an entire class.</p>
+            <label>Select Class</label>
+            <select id="broadClass" onchange="generateBroadsheet()"></select>
+            <div class="table-responsive" style="margin-top: 15px;">
+                <table id="broadTable">
+                    <thead><tr><th>Roll</th><th>Name</th><th>Total Score</th><th>Overall Position</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Print Area -->
+<div id="printArea">
+    <div class="report-header-flex">
+        <div class="logo-box" id="pStudentPhotoBox" style="background-color: #f1f5f9;">
+            PHOTO
+        </div>
+        
+        <div class="school-info">
+            <h1 class="report-title">NKRANKROM M/A BASIC SCHOOL</h1>
+            <div class="report-address">POST OFFICE BOX SY 134, SUNYANI</div>
+            <div class="report-subtitle">LEARNER'S TERMINAL REPORT</div>
+        </div>
+    </div>
+
+    <div class="student-info-grid">
+        <div class="info-row">NAME: <span id="pName" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">CLASS: <span id="pClass" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">NUMBER ON ROLL: <span id="pRoll" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">POSITION IN CLASS: <span id="pPos" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">ACADEMIC YEAR: <span id="pYear" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">TERM: <span id="pTerm" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">NEXT TERM BEGINS: <span id="pNext" style="font-weight:normal; margin-left:6px;"></span></div>
+        <div class="info-row">VACATION DATE: <span id="pVac" style="font-weight:normal; margin-left:6px;"></span></div>
+    </div>
+
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th class="left-align">SUBJECT</th>
+                <th>CLASS SCORE<br>(50%)</th>
+                <th>EXAM SCORE<br>(50%)</th>
+                <th>TOTAL SCORE<br>(100%)</th>
+                <th>POSITION</th>
+                <th>REMARKS</th>
+            </tr>
+        </thead>
+        <tbody id="pSubjectTable"></tbody>
+    </table>
+
+    <div class="remarks-section">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="display: flex; flex: 1; align-items: flex-end; margin-right: 20px;">
+                <span style="white-space: nowrap; margin-right: 8px;">ATTENDANCE:</span>
+                <span id="pAtt" style="border-bottom: 1px dotted #000; flex: 1; font-weight: normal; text-align: center;"></span>
+            </div>
+            <div style="display: flex; flex: 1; align-items: flex-end;">
+                <span style="white-space: nowrap; margin-right: 8px;">PROMOTED TO:</span>
+                <span id="pProm" style="border-bottom: 1px dotted #000; flex: 1; font-weight: normal; text-align: center;"></span>
+            </div>
+        </div>
+
+        <div class="flex-row-remark">
+            <span>ATTITUDE:</span><span class="remark-line" id="pAttitude"></span>
+        </div>
+        <div class="flex-row-remark">
+            <span>CONDUCT:</span><span class="remark-line" id="pConduct"></span>
+        </div>
+        <div class="flex-row-remark">
+            <span>INTEREST:</span><span class="remark-line" id="pInterest"></span>
+        </div>
+        <div class="flex-row-remark">
+            <span>CLASS TEACHER'S REMARKS:</span><span class="remark-line" id="pTRemarks"></span>
+        </div>
+        <div class="flex-row-remark">
+            <span>HEADTEACHER'S REMARKS:</span><span class="remark-line" id="pHRemarks"></span>
+        </div>
+        
+        <div class="signature-grid">
+            <div>
+                <div class="sig-image-container"><img id="pTSigImage" src="" style="max-height: 40px; display: none;"></div>
+                <span class="sig-line"></span>
+                CLASS TEACHER'S SIGNATURE
+            </div>
+            <div>
+                <div class="sig-image-container"><img id="pHSigImage" src="" style="max-height: 40px; display: none;"></div>
+                <span class="sig-line"></span>
+                HEADTEACHER'S SIGNATURE
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="printActions" class="no-print" style="display: none; text-align: center; margin-top: 20px; padding-bottom: 30px;">
+    <button onclick="window.print()" style="width: 180px; background: #16a34a; margin-right: 10px; padding: 12px;">Print / Save PDF</button>
+    <button onclick="closeReport()" style="width: 180px; background: #64748b; padding: 12px;">Close</button>
+</div>
+
+
+<script>
+    // --- DATABASE & STATE ---
+    let db = {
+        students: JSON.parse(localStorage.getItem('nk_students')) || [],
+        scores: JSON.parse(localStorage.getItem('nk_scores')) || {}, 
+        details: JSON.parse(localStorage.getItem('nk_details')) || {}
+    };
+
+    let signatures = JSON.parse(localStorage.getItem('nk_signatures')) || { teacher: '', head: '' };
+    let editingStudentId = null;
+
+    function saveData() {
+        localStorage.setItem('nk_students', JSON.stringify(db.students));
+        localStorage.setItem('nk_scores', JSON.stringify(db.scores));
+        localStorage.setItem('nk_details', JSON.stringify(db.details));
+    }
+
+    const classes = ["Nursery", "KG 1", "KG 2", "Basic 1", "Basic 2", "Basic 3", "Basic 4", "Basic 5", "Basic 6", "Basic 7 (JHS 1)", "Basic 8 (JHS 2)", "Basic 9 (JHS 3)"];
+    
+    const subEarly = ["LANGUAGE & LITERACY", "NUMERACY", "CREATIVE ARTS"];
+    const subPrimary = ["ENGLISH LANGUAGE", "MATHEMATICS", "SCIENCE", "HISTORY", "R.M.E.", "COMPUTING", "CREATIVE ARTS", "GHANAIAN LANGUAGE"];
+    const subJHS = ["ENGLISH LANGUAGE", "MATHEMATICS", "SCIENCE", "SOCIAL STUDIES", "R.M.E.", "COMPUTING", "CREATIVE ARTS & DESIGN", "CAREER TECHNOLOGY", "GHANAIAN LANGUAGE"];
+
+
+    // --- UI LOGIC ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // --- CUSTOM INPUT HANDLER FOR DROPDOWNS ---
+    function handleCustomInput(selectId, customBoxId) {
+        let sel = document.getElementById(selectId);
+        let box = document.getElementById(customBoxId);
+        let customInputId = customBoxId.replace('Box', 'Input');
+        let customInput = document.getElementById(customInputId);
+
+        if (sel.value === "CUSTOM_WRITE") {
+            box.style.display = "block";
+            customInput.focus();
+            sel.value = customInput.value; // set to current text or empty
+        } else {
+            box.style.display = "none";
+            customInput.value = "";
+        }
+    }
+
+    function syncCustomInput(inputId, selectId) {
+        let textVal = document.getElementById(inputId).value;
+        let sel = document.getElementById(selectId);
+        
+        // Find or create custom option dynamically
+        let customOpt = sel.querySelector('option[value="CUSTOM_DYNAMIC_VAL"]');
+        if (!customOpt) {
+            customOpt = document.createElement('option');
+            customOpt.value = "CUSTOM_DYNAMIC_VAL";
+            sel.appendChild(customOpt);
+        }
+        customOpt.text = textVal ? "✏️ " + textVal : "✏️ Write Custom...";
+        customOpt.value = textVal;
+        sel.value = textVal;
+    }
+
+    window.onload = () => {
+
+        const classDrops = ['regClass', 'filterRoster', 'sbaClass', 'repClass', 'broadClass'];
+        classDrops.forEach(id => {
+            let el = document.getElementById(id);
+            if(id !== 'regClass') el.innerHTML = (id === 'filterRoster') ? '<option value="All">All Classes</option>' : '<option value="">--Select--</option>';
+            classes.forEach(c => el.innerHTML += `<option value="${c}">${c}</option>`);
+        });
+
+        let rollEl = document.getElementById('regRoll');
+        rollEl.innerHTML = '<option value="">--Select Roll No.--</option>';
+        for (let i = 1; i <= 100; i++) {
+            rollEl.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+
+        let yearEl = document.getElementById('rYear');
+        yearEl.innerHTML = '';
+        for (let year = 2024; year <= 2074; year++) {
+            let yrString = `${year}/${year + 1}`;
+            let isSelected = (year === 2024) ? 'selected' : '';
+            yearEl.innerHTML += `<option value="${yrString}" ${isSelected}>${yrString}</option>`;
+        }
+
+        let promEl = document.getElementById('rProm');
+        promEl.innerHTML = `
+            <option value="">-- Select Status --</option>
+            <option value="REPEATED">REPEATED</option>
+            <option value="PROMOTED ON PROBATION">PROMOTED ON PROBATION</option>
+            <option value="PROMOTED ON TRIAL">PROMOTED ON TRIAL</option>
+        `;
+        classes.forEach(c => promEl.innerHTML += `<option value="${c}">${c}</option>`);
+
+        renderRoster();
+        initSignatureCanvas('tSigCanvas');
+        initSignatureCanvas('hSigCanvas');
+        loadSignaturesToCanvas();
+    }
+
+    // --- SIGNATURE PAD LOGIC ---
+    function initSignatureCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+            if (e.touches) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            return { x, y };
+        }
+
+        function startPos(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function endPos() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); 
+            const pos = getPos(e);
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        canvas.addEventListener('mousedown', startPos);
+        canvas.addEventListener('mouseup', endPos);
+        canvas.addEventListener('mousemove', draw);
+        
+        canvas.addEventListener('touchstart', startPos, {passive: false});
+        canvas.addEventListener('touchend', endPos);
+        canvas.addEventListener('touchmove', draw, {passive: false});
+    }
+
+    function clearCanvas(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveSignatures() {
+        signatures.teacher = isCanvasBlank('tSigCanvas') ? '' : document.getElementById('tSigCanvas').toDataURL();
+        signatures.head = isCanvasBlank('hSigCanvas') ? '' : document.getElementById('hSigCanvas').toDataURL();
+        localStorage.setItem('nk_signatures', JSON.stringify(signatures));
+        alert("Signatures saved securely!");
+    }
+
+    function loadSignaturesToCanvas() {
+        if(signatures.teacher) {
+            let img1 = new Image();
+            img1.onload = () => document.getElementById('tSigCanvas').getContext('2d').drawImage(img1, 0, 0);
+            img1.src = signatures.teacher;
+        }
+        if(signatures.head) {
+            let img2 = new Image();
+            img2.onload = () => document.getElementById('hSigCanvas').getContext('2d').drawImage(img2, 0, 0);
+            img2.src = signatures.head;
+        }
+    }
+
+    function isCanvasBlank(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const blank = document.createElement('canvas');
+        blank.width = canvas.width; blank.height = canvas.height;
+        return canvas.toDataURL() === blank.toDataURL();
+    }
+
+
+    // --- IMAGE COMPRESSOR ---
+    function compressImage(file, callback) {
+        if(!file) return callback("");
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let img = new Image();
+            img.onload = function() {
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                canvas.width = 150; canvas.height = 150;
+                
+                let minSize = Math.min(img.width, img.height);
+                let startX = (img.width - minSize) / 2;
+                let startY = (img.height - minSize) / 2;
+                
+                ctx.drawImage(img, startX, startY, minSize, minSize, 0, 0, 150, 150);
+                callback(canvas.toDataURL('image/jpeg', 0.6));
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // --- TAB 1: ROSTER & EDITING LOGIC ---
+    function saveStudent() {
+        let sClass = document.getElementById('regClass').value;
+        let sRoll = document.getElementById('regRoll').value;
+        let sName = document.getElementById('regName').value.toUpperCase();
+        let photoInput = document.getElementById('regPhoto').files[0];
+
+        if(!sRoll || !sName) return alert("Select roll number and fill name!");
+
+        if (editingStudentId) {
+            let student = db.students.find(s => s.id === editingStudentId);
+            if (student) {
+                student.sClass = sClass;
+                student.sRoll = sRoll;
+                student.sName = sName;
+                
+                if (photoInput) {
+                    compressImage(photoInput, (base64Img) => {
+                        student.photo = base64Img;
+                        finalizeStudentSave(true);
+                    });
+                } else {
+                    finalizeStudentSave(true);
+                }
+            }
+        } else {
+            compressImage(photoInput, (base64Img) => {
+                let id = "STU_" + Date.now();
+                db.students.push({ id, sClass, sRoll, sName, photo: base64Img });
+                finalizeStudentSave(false);
+            });
+        }
+    }
+
+    function finalizeStudentSave(isUpdate) {
+        saveData();
+        resetStudentForm();
+        renderRoster();
+        loadReportStudents();
+        alert(isUpdate ? "Student Updated Successfully!" : "Student Added Successfully!");
+    }
+
+    function editStudent(id) {
+        let student = db.students.find(s => s.id === id);
+        if(!student) return;
+
+        editingStudentId = id;
+        document.getElementById('regClass').value = student.sClass;
+        document.getElementById('regRoll').value = student.sRoll;
+        document.getElementById('regName').value = student.sName;
+        document.getElementById('regPhoto').value = ""; 
+
+        document.getElementById('formTitle').innerText = "Edit Student Details";
+        let saveBtn = document.getElementById('saveStudentBtn');
+        saveBtn.innerText = "Update Student Details";
+        saveBtn.className = "success";
+
+        if(!document.getElementById('cancelEditBtn')) {
+            let cancelBtn = document.createElement('button');
+            cancelBtn.id = 'cancelEditBtn';
+            cancelBtn.className = 'danger';
+            cancelBtn.innerText = 'Cancel Edit';
+            cancelBtn.style.marginTop = '5px';
+            cancelBtn.onclick = resetStudentForm;
+            saveBtn.parentNode.appendChild(cancelBtn);
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetStudentForm() {
+        editingStudentId = null;
+        document.getElementById('formTitle').innerText = "Add Student to Roster";
+        document.getElementById('regRoll').value = "";
+        document.getElementById('regName').value = "";
+        document.getElementById('regPhoto').value = "";
+        
+        let saveBtn = document.getElementById('saveStudentBtn');
+        saveBtn.innerText = "Add Student Securely";
+        saveBtn.className = "";
+
+        let cancelBtn = document.getElementById('cancelEditBtn');
+        if(cancelBtn) cancelBtn.remove();
+    }
+
+    function renderRoster() {
+        let filter = document.getElementById('filterRoster').value;
+        let tbody = document.querySelector('#rosterTable tbody');
+        tbody.innerHTML = "";
+        
+        let list = filter === "All" ? db.students : db.students.filter(s => s.sClass === filter);
+        list.sort((a,b) => a.sRoll - b.sRoll).forEach((s) => {
+            let imgTag = s.photo ? `<img src="${s.photo}" class="thumb">` : 'N/A';
+            tbody.innerHTML += `<tr>
+                <td>${imgTag}</td><td>${s.sRoll}</td><td class="name-col">${s.sName}</td><td>${s.sClass}</td>
+                <td>
+                    <button style="padding:4px 8px; margin:0 2px 0 0; background:var(--secondary); width:auto;" onclick="editStudent('${s.id}')">Edit</button>
+                    <button class="danger" style="padding:4px 8px; margin:0; width:auto;" onclick="deleteStudent('${s.id}')">Del</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function deleteStudent(id) {
+        if(confirm("Delete student?")) {
+            db.students = db.students.filter(s => s.id !== id);
+            saveData();
+            renderRoster();
+            loadReportStudents();
+            if(editingStudentId === id) resetStudentForm();
+        }
+    }
+
+    // --- TAB 2: SBA REGISTER ---
+    function getSubjectList(c) {
+        if(!c) return [];
+        if(c.includes('Nursery') || c.includes('KG')) return subEarly;
+        if(c.includes('7') || c.includes('8') || c.includes('9')) return subJHS;
+        return subPrimary;
+    }
+
+    function loadSubjects() {
+        let c = document.getElementById('sbaClass').value;
+        let subjEl = document.getElementById('sbaSubject');
+        subjEl.innerHTML = '<option value="">--Select Subject--</option>';
+        getSubjectList(c).forEach(s => subjEl.innerHTML += `<option value="${s}">${s}</option>`);
+    }
+
+    function loadSBATable() {
+        let cls = document.getElementById('sbaClass').value;
+        let sub = document.getElementById('sbaSubject').value;
+        let tbody = document.querySelector('#sbaTable tbody');
+        tbody.innerHTML = "";
+        if(!cls || !sub) return;
+
+        let list = db.students.filter(s => s.sClass === cls).sort((a,b) => a.sName.localeCompare(b.sName));
+        
+        let tempScores = [];
+        list.forEach(s => {
+            let d = db.scores[`${sub}_${cls}_${s.id}`] || {it:'', gw:'', ct:'', proj:'', exam:''};
+            let total60 = (Number(d.it)+Number(d.gw)+Number(d.ct)+Number(d.proj));
+            let sba50 = total60 > 0 ? (total60/60)*50 : 0;
+            let exam50 = d.exam ? (Number(d.exam)/100)*50 : 0;
+            tempScores.push({id: s.id, overall: sba50 + exam50});
+        });
+        
+        tempScores.sort((a,b) => b.overall - a.overall);
+        let rankMap = {};
+        tempScores.forEach((t, i) => rankMap[t.id] = getOrdinal(i+1));
+
+        list.forEach((s, i) => {
+            let d = db.scores[`${sub}_${cls}_${s.id}`] || {it:'', gw:'', ct:'', proj:'', exam:''};
+            let total60 = (Number(d.it)+Number(d.gw)+Number(d.ct)+Number(d.proj));
+            let sba50 = total60 > 0 ? ((total60/60)*50).toFixed(1) : '';
+            let exam50 = d.exam ? ((Number(d.exam)/100)*50).toFixed(1) : '';
+            let overall = (total60 > 0 || d.exam) ? (Number(sba50) + Number(exam50)).toFixed(1) : '';
+            let pos = overall ? rankMap[s.id] : '';
+
+            tbody.innerHTML += `
+                <tr data-id="${s.id}">
+                    <td>${i+1}</td>
+                    <td class="name-col">${s.sName}</td>
+                    <td><input class="input-cell" type="number" value="${d.it}" oninput="calcRow(this)"></td>
+                    <td><input class="input-cell" type="number" value="${d.gw}" oninput="calcRow(this)"></td>
+                    <td><input class="input-cell" type="number" value="${d.ct}" oninput="calcRow(this)"></td>
+                    <td><input class="input-cell" type="number" value="${d.proj}" oninput="calcRow(this)"></td>
+                    <td class="calc-cell" data-val="tot60">${total60 || ''}</td>
+                    <td class="calc-cell" data-val="sca50">${sba50}</td>
+                    <td><input class="input-cell" type="number" value="${d.exam}" oninput="calcRow(this)"></td>
+                    <td class="calc-cell" data-val="ex50">${exam50}</td>
+                    <td class="calc-cell" data-val="overall">${overall}</td>
+                    <td class="calc-cell">${pos}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function calcRow(el) {
+        let tr = el.closest('tr');
+        let inputs = tr.querySelectorAll('input');
+        let tot60 = Number(inputs[0].value) + Number(inputs[1].value) + Number(inputs[2].value) + Number(inputs[3].value);
+        let exam = Number(inputs[4].value);
+
+        tr.querySelector('[data-val="tot60"]').innerText = tot60 > 0 ? tot60 : '';
+        tr.querySelector('[data-val="sca50"]').innerText = tot60 > 0 ? ((tot60/60)*50).toFixed(1) : '';
+        tr.querySelector('[data-val="ex50"]').innerText = exam > 0 ? ((exam/100)*50).toFixed(1) : '';
+        tr.querySelector('[data-val="overall"]').innerText = (tot60>0 || exam>0) ? (((tot60/60)*50) + ((exam/100)*50)).toFixed(1) : '';
+    }
+
+    function saveSBASheet() {
+        let cls = document.getElementById('sbaClass').value;
+        let sub = document.getElementById('sbaSubject').value;
+        if(!cls || !sub) return;
+
+        let rows = document.querySelectorAll('#sbaTable tbody tr');
+        rows.forEach(tr => {
+            let id = tr.getAttribute('data-id');
+            let inputs = tr.querySelectorAll('input');
+            db.scores[`${sub}_${cls}_${id}`] = {
+                it: inputs[0].value, gw: inputs[1].value, ct: inputs[2].value, proj: inputs[3].value, exam: inputs[4].value
+            };
+        });
+        saveData();
+        loadSBATable(); 
+        alert("Subject marks saved securely!");
+    }
+
+    // --- TAB 3: REPORT CARDS ---
+    function loadReportStudents() {
+        let cls = document.getElementById('repClass').value;
+        let sel = document.getElementById('repStudent');
+        sel.innerHTML = '<option value="">--Select Student--</option>';
+        if(!cls) { document.getElementById('reportDetailsForm').style.display = "none"; return; }
+        
+        let list = db.students.filter(s => s.sClass === cls).sort((a,b) => a.sName.localeCompare(b.sName));
+        list.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.sName}</option>`);
+        document.getElementById('reportDetailsForm').style.display = "block";
+    }
+
+    function formatDateDisplay(dateStr) {
+        if(!dateStr) return "";
+        let parts = dateStr.split('-');
+        if(parts.length !== 3) return dateStr;
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    function loadStudentDetails() {
+        let sid = document.getElementById('repStudent').value;
+        if(!sid) return;
+        let d = db.details[sid] || {};
+        
+        document.getElementById('rYear').value = d.year || "2024/2025";
+        document.getElementById('rTerm').value = d.term || "THREE";
+        document.getElementById('rNext').value = d.next || "";
+        document.getElementById('rVac').value = d.vac || "";
+        
+        let attData = d.att || " OUT OF ";
+        let attParts = attData.split(" OUT OF ");
+        document.getElementById('rAttPresent').value = attParts[0] ? attParts[0].trim() : "";
+        document.getElementById('rAttTotal').value = attParts[1] ? attParts[1].trim() : "";
+        
+        document.getElementById('rProm').value = d.prom || "";
+        
+        // Helper to set dropdown or handle custom values
+        setSelectValAndCustom('rAttitude', 'rAttitudeCustomBox', 'rAttitudeCustomInput', d.attitude);
+        setSelectValAndCustom('rConduct', 'rConductCustomBox', 'rConductCustomInput', d.conduct);
+        setSelectValAndCustom('rInterest', 'rInterestCustomBox', 'rInterestCustomInput', d.interest);
+        setSelectValAndCustom('rTRemarks', 'rTRemarksCustomBox', 'rTRemarksCustomInput', d.tRemarks);
+        setSelectValAndCustom('rHRemarks', 'rHRemarksCustomBox', 'rHRemarksCustomInput', d.hRemarks);
+    }
+
+    function setSelectValAndCustom(selectId, boxId, inputId, val) {
+        if (!val) {
+            document.getElementById(selectId).value = "";
+            document.getElementById(boxId).style.display = "none";
+            document.getElementById(inputId).value = "";
+            return;
+        }
+        let sel = document.getElementById(selectId);
+        let found = false;
+        for (let opt of sel.options) {
+            if (opt.value === val) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            sel.value = val;
+            document.getElementById(boxId).style.display = "none";
+            document.getElementById(inputId).value = "";
+        } else {
+            sel.value = val;
+            document.getElementById(boxId).style.display = "block";
+            document.getElementById(inputId).value = val;
+            let customOpt = sel.querySelector('option[value="CUSTOM_DYNAMIC_VAL"]');
+            if (!customOpt) {
+                customOpt = document.createElement('option');
+                customOpt.value = "CUSTOM_DYNAMIC_VAL";
+                sel.appendChild(customOpt);
+            }
+            customOpt.text = "✏️ " + val;
+            customOpt.value = val;
+        }
+    }
+
+    function getGradeRemark(score) {
+        if(score >= 80) return "Excellent";
+        if(score >= 70) return "Very Good";
+        if(score >= 65) return "Good";
+        if(score >= 60) return "Credit";
+        if(score >= 55) return "Credit";
+        if(score >= 50) return "Pass";
+        if(score >= 45) return "Pass";
+        if(score >= 40) return "Weak Pass";
+        return "Fail";
+    }
+
+    function getOrdinal(n) {
+        let s = ["th", "st", "nd", "rd"], v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+
+    function generateReport() {
+        let cls = document.getElementById('repClass').value;
+        let sid = document.getElementById('repStudent').value;
+        if(!cls || !sid) return alert("Select class and student");
+
+        let stu = db.students.find(s => s.id === sid);
+
+        let present = document.getElementById('rAttPresent').value;
+        let total = document.getElementById('rAttTotal').value;
+        let attString = (present && total) ? `${present} OUT OF ${total}` : "";
+
+        db.details[sid] = {
+            year: document.getElementById('rYear').value,
+            term: document.getElementById('rTerm').value,
+            next: document.getElementById('rNext').value,
+            vac: document.getElementById('rVac').value,
+            att: attString,
+            prom: document.getElementById('rProm').value,
+            attitude: document.getElementById('rAttitude').value,
+            conduct: document.getElementById('rConduct').value,
+            interest: document.getElementById('rInterest').value,
+            tRemarks: document.getElementById('rTRemarks').value,
+            hRemarks: document.getElementById('rHRemarks').value
+        };
+        saveData();
+
+        let list = getSubjectList(cls);
+        let tbody = document.getElementById('pSubjectTable');
+        tbody.innerHTML = "";
+        let allClassStudents = db.students.filter(s => s.sClass === cls);
+
+        list.forEach(sub => {
+            let subScores = [];
+            allClassStudents.forEach(cs => {
+                let d = db.scores[`${sub}_${cls}_${cs.id}`];
+                if(d) {
+                    let sba = (((Number(d.it)+Number(d.gw)+Number(d.ct)+Number(d.proj))/60)*50) || 0;
+                    let ex = ((Number(d.exam)/100)*50) || 0;
+                    subScores.push({id: cs.id, total: sba+ex});
+                }
+            });
+            subScores.sort((a,b) => b.total - a.total);
+            let myRank = subScores.findIndex(x => x.id === sid) + 1;
+            
+            let d = db.scores[`${sub}_${cls}_${sid}`];
+            if(d) {
+                let sba50 = (((Number(d.it)+Number(d.gw)+Number(d.ct)+Number(d.proj))/60)*50) || 0;
+                let ex50 = ((Number(d.exam)/100)*50) || 0;
+                let overall = sba50 + ex50;
+                let roundedOverall = Math.round(overall); 
+
+                tbody.innerHTML += `<tr><td class="left-align">${sub}</td><td>${Math.round(sba50)}</td><td>${Math.round(ex50)}</td><td style="font-weight:bold;">${roundedOverall}</td><td>${getOrdinal(myRank)}</td><td>${getGradeRemark(roundedOverall)}</td></tr>`;
+            } else {
+                tbody.innerHTML += `<tr><td class="left-align">${sub}</td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            }
+        });
+
+        let overallScores = [];
+        allClassStudents.forEach(cs => {
+            let gt = 0;
+            list.forEach(sub => {
+                let d = db.scores[`${sub}_${cls}_${cs.id}`];
+                if(d) gt += ((((Number(d.it)+Number(d.gw)+Number(d.ct)+Number(d.proj))/60)*50)||0) + (((Number(d.exam)/100)*50)||0);
+            });
+            overallScores.push({id: cs.id, gt: gt});
+        });
+        overallScores.sort((a,b) => b.gt - a.gt);
+        let classPos = overallScores.findIndex(x => x.id === sid) + 1;
+
+        document.getElementById('pStudentPhotoBox').style.backgroundImage = stu.photo ? `url(${stu.photo})` : 'none';
+        document.getElementById('pStudentPhotoBox').innerHTML = stu.photo ? '' : 'PHOTO';
+
+        document.getElementById('pName').innerText = stu.sName;
+        document.getElementById('pClass').innerText = stu.sClass;
+        document.getElementById('pRoll').innerText = stu.sRoll;
+        document.getElementById('pPos').innerText = getOrdinal(classPos);
+        
+        let det = db.details[sid];
+        document.getElementById('pYear').innerText = det.year;
+        document.getElementById('pTerm').innerText = det.term;
+        
+        document.getElementById('pNext').innerText = formatDateDisplay(det.next);
+        document.getElementById('pVac').innerText = formatDateDisplay(det.vac);
+        
+        document.getElementById('pAtt').innerText = det.att;
+        document.getElementById('pProm').innerText = det.prom;
+        document.getElementById('pAttitude').innerText = det.attitude;
+        document.getElementById('pConduct').innerText = det.conduct;
+        document.getElementById('pInterest').innerText = det.interest;
+        document.getElementById('pTRemarks').innerText = det.tRemarks;
+        document.getElementById('pHRemarks').innerText = det.hRemarks;
+
+        let pTSigImage = document.getElementById('pTSigImage');
+        if(signatures.teacher) {
+            pTSigImage.src = signatures.teacher;
+            pTSigImage.style.display = 'block';
+        } else { pTSigImage.style.display = 'none'; }
+        
+        let pHSigImage = document.getElementById('pHSigImage');
+        if(signatures.head) {
+            pHSigImage.src = signatures.head;
+            pHSigImage.style.display = 'block';
+        } else { pHSigImage.style.display = 'none'; }
+
+        window.scrollTo(0,0);
+        document.querySelector('.tab-bar').style.display = 'none';
+        document.querySelector('.container').style.display = 'none';
+        document.querySelector('header').style.display = 'none';
+        document.getElementById('printArea').style.display = 'block';
+        document.getElementById('printActions').style.display = 'block';
+    }
+
+    function closeReport() {
+        document.querySelector('.tab-bar').style.display = 'flex';
+        document.querySelector('.container').style.display = 'block';
+        document.querySelector('header').style.display = 'block';
+        document.getElementById('printArea').style.display = 'none';
+        document.getElementById('printActions').style.display = 'none';
+    }
+
+    // --- TAB 4: BROADSHEET ---
+    function generateBroadsheet() {
+        let cls = document.getElementById('broadClass').value;
+        let tbody = document.querySelector('#broadTable tbody');
+        tbody.innerHTML = "";
+        if(!cls) return;
+
+        let allClassStudents = db.students.filter(s => s.sClass === cls);
+        let list = getSubjectList(cls);
+        
+        let overallScores = [];
+        allClassStudents.forEach(cs => {
+            let gt = 0;
+            list.forEach(sub => {
+                let d = db.scores[`${sub}_${cls}_${cs.id}`];
+                if(d) gt += ((((Number(d.it)+Number(d.gw)+Number(d.ct)+Number(d.proj))/60)*50)||0) + (((Number(d.exam)/100)*50)||0);
+            });
+            overallScores.push({id: cs.id, roll: cs.sRoll, name: cs.sName, gt: Math.round(gt)});
+        });
+        
+        overallScores.sort((a,b) => b.gt - a.gt);
+        overallScores.forEach((s, i) => {
+            tbody.innerHTML += `<tr><td>${s.roll}</td><td class="name-col">${s.name}</td><td style="font-weight:bold;">${s.gt}</td><td>${getOrdinal(i+1)}</td></tr>`;
+        });
+    }
+</script>
+</body>
+</html>
