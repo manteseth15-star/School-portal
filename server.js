@@ -1,45 +1,31 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const path = require('path');
 
 const app = express();
+
+// Middleware to parse form data and JSON
 app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
-const mongoURI = 'mongodb+srv://manteseth15_db_user:YToiFTVc7EMvCzJi@cluster0.jabd23g.mongodb.net/schoolPortal?retryWrites=true&w=majority&appName=Cluster0';
+// Option A: If your HTML/CSS/JS files are inside a folder named 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect(mongoURI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Option B: If your main HTML file is right in the main folder (not in 'public'), 
+// comment out the line above and uncomment the line below instead:
+// app.get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'index.html'));
+// });
 
-const studentSchema = new mongoose.Schema({
-  name: String,
-  studentId: String,
-  course: String,
-  date: { type: Date, default: Date.now }
-});
+// Connect to MongoDB using the environment variable from Render
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
-const Student = mongoose.model('Student', studentSchema);
+mongoose.connect(MONGO_URI)
+    .then(() => console.log('MongoDB connected successfully'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
-app.post('/api/students', async (req, res) => {
-  try {
-    const newStudent = new Student(req.body);
-    await newStudent.save();
-    res.status(201).json({ message: 'Student saved successfully!' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/students', async (req, res) => {
-  try {
-    const students = await Student.find();
-    res.json(students);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+// Start server (Render automatically assigns a port, or defaults to 3000 locally)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
